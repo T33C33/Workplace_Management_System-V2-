@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}{{ hall.name }} - Seat Arrangement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-chair"></i> {{ hall.name }} - Seat Arrangement</h1>
+    <a href="{{ url_for('workplace.workplace_profile', workplace_id=workplace.id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Workplace
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-map"></i> Drag and Drop Seat Layout</h6>
+            </div>
+            <div class="card-body">
+                <div id="seatArrangementArea" class="seat-arrangement-area">
+                    {% for seat in seats %}
+                    <div class="seat-tile" 
+                         data-seat-id="{{ seat.id }}"
+                         style="left: {{ seat.position_x }}px; top: {{ seat.position_y }}px;">
+                        {{ seat.seat_number }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle"></i> Hall Information</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Hall:</strong> {{ hall.name }}</p>
+                <p><strong>Capacity:</strong> {{ hall.capacity }} seats</p>
+                <p><strong>Active Seats:</strong> {{ seats|length }}</p>
+                {% if hall.description %}
+                <p><strong>Description:</strong> {{ hall.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-question-circle"></i> Instructions</h6>
+            </div>
+            <div class="card-body">
+                <ul class="text-sm">
+                    <li>Drag seats to arrange them</li>
+                    <li>Positions are saved automatically</li>
+                    <li>Green seats are available</li>
+                    <li>Red seats are occupied</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Make seats draggable
+    $('.seat-tile').draggable({
+        containment: '#seatArrangementArea',
+        stop: function(event, ui) {
+            const seatId = $(this).data('seat-id');
+            const position = ui.position;
+            
+            // Save position to server
+            $.ajax({
+                url: `/workplace/api/seats/${seatId}/position`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    x: position.left,
+                    y: position.top
+                }),
+                success: function(response) {
+                    console.log('Position saved');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving position:', error);
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

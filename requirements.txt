@@ -1,0 +1,17 @@
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-Login==0.6.3
+Flask-Mail==0.9.1
+cryptography==41.0.4
+APScheduler==3.10.4
+python-dotenv==1.0.0
+Werkzeug==2.3.7
+requests==2.31.0
+PyMySQL==1.1.0
+
+# Optional AI features
+# openai==0.28.1
+
+# Optional real-time features
+# flask-socketio==5.3.6
+# python-socketio==5.9.0

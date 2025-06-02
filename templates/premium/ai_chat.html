@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}AI Assistant{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-robot"></i> AI Assistant</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-comments"></i> Chat with AI Assistant</h5>
+            </div>
+            <div class="card-body">
+                <div id="chatMessages" class="chat-messages mb-3" style="height: 400px; overflow-y: auto; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px;">
+                    <div class="message ai-message">
+                        <div class="message-content">
+                            <strong>AI Assistant:</strong> Hello! I'm here to help you with the Workplace Management System. You can ask me about seat booking, task management, workplace features, or general productivity tips. How can I assist you today?
+                        </div>
+                        <small class="text-muted">Just now</small>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="messageInput" class="form-control" placeholder="Type your message here..." maxlength="500">
+                    <button class="btn btn-primary" type="button" id="sendButton">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+                
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-lightbulb"></i> 
+                        Try asking: "How do I book a seat?", "What are the premium features?", or "How do I manage tasks?"
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-messages {
+    background-color: var(--card-bg);
+}
+
+.message {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.user-message {
+    background-color: #e3f2fd;
+    margin-left: 20%;
+    text-align: right;
+}
+
+.ai-message {
+    background-color: #f5f5f5;
+    margin-right: 20%;
+}
+
+[data-theme="dark"] .user-message {
+    background-color: #1565c0;
+    color: white;
+}
+
+[data-theme="dark"] .ai-message {
+    background-color: #424242;
+    color: #e0e0e0;
+}
+
+.message-content {
+    margin-bottom: 5px;
+}
+
+.typing-indicator {
+    display: none;
+    font-style: italic;
+    color: #666;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    const chatMessages = $('#chatMessages');
+    const messageInput = $('#messageInput');
+    const sendButton = $('#sendButton');
+    
+    function addMessage(content, isUser = false) {
+        const messageClass = isUser ? 'user-message' : 'ai-message';
+        const sender = isUser ? 'You' : 'AI Assistant';
+        const time = new Date().toLocaleTimeString();
+        
+        const messageHtml = `
+            <div class="message ${messageClass}">
+                <div class="message-content">
+                    <strong>${sender}:</strong> ${content}
+                </div>
+                <small class="text-muted">${time}</small>
+            </div>
+        `;
+        
+        chatMessages.append(messageHtml);
+        chatMessages.scrollTop(chatMessages[0].scrollHeight);
+    }
+    
+    function showTypingIndicator() {
+        const typingHtml = `
+            <div class="message ai-message typing-indicator" id="typingIndicator">
+                <div class="message-content">
+                    <strong>AI Assistant:</strong> <i>typing...</i>
+                </div>
+            </div>
+        `;
+        chatMessages.append(typingHtml);
+        $('.typing-indicator').show();
+        chatMessages.scrollTop(chatMessages[0].scrollHeight);
+    }
+    
+    function hideTypingIndicator() {
+        $('#typingIndicator').remove();
+    }
+    
+    function sendMessage() {
+        const message = messageInput.val().trim();
+        if (!message) return;
+        
+        // Add user message
+        addMessage(message, true);
+        messageInput.val('');
+        sendButton.prop('disabled', true);
+        
+        // Show typing indicator
+        showTypingIndicator();
+        
+        // Send to AI
+        $.ajax({
+            url: '/premium/api/ai-chat',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ message: message }),
+            success: function(response) {
+                hideTypingIndicator();
+                if (response.status) {
+                    addMessage(response.message);
+                } else {
+                    addMessage('Sorry, I encountered an error. Please try again.');
+                }
+            },
+            error: function() {
+                hideTypingIndicator();
+                addMessage('Sorry, I\'m having trouble connecting. Please try again later.');
+            },
+            complete: function() {
+                sendButton.prop('disabled', false);
+                messageInput.focus();
+            }
+        });
+    }
+    
+    sendButton.click(sendMessage);
+    
+    messageInput.keypress(function(e) {
+        if (e.which === 13) { // Enter key
+            sendMessage();
+        }
+    });
+    
+    messageInput.focus();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ workplace.name }} Profile{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-edit"></i> Edit Workplace Profile</h1>
+    <a href="{{ url_for('workplace.workplace_profile', workplace_id=workplace.id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Profile
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Workplace Logo</label>
+                        <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                        {% if workplace.logo_filename %}
+                        <div class="mt-2">
+                            <img src="{{ url_for('static', filename='uploads/workplace_logos/' + workplace.logo_filename) }}" 
+                                 alt="Current Logo" style="height: 60px;">
+                            <small class="text-muted d-block">Current logo</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="about" class="form-label">About</label>
+                        <textarea class="form-control" id="about" name="about" rows="4">{{ workplace.about or '' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="website" class="form-label">Website</label>
+                        <input type="url" class="form-control" id="website" name="website" value="{{ workplace.website or '' }}">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ workplace.phone or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="contact_email" class="form-label">Contact Email</label>
+                            <input type="email" class="form-control" id="contact_email" name="contact_email" value="{{ workplace.contact_email or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="operating_hours" class="form-label">Operating Hours</label>
+                        <input type="text" class="form-control" id="operating_hours" name="operating_hours" 
+                               value="{{ workplace.operating_hours or '' }}" placeholder="e.g., Mon-Fri 8:00 AM - 6:00 PM">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{{ url_for('workplace.workplace_profile', workplace_id=workplace.id) }}" class="btn btn-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
