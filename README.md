@@ -29,7 +29,7 @@ Run the application:
 python3 run.py
 ```
 
-Dwbug the appliction:
+Debug the appliction:
 ```
     python3 app.py
 ```
